@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บันทึกการเติมน้ำมันรถยนต์</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e9f5ff; /* สีฟ้าอ่อน */
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0073e6; /* สีฟ้าสด */
+            font-size: 2.5rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 150px;
+            max-width: 400px;
+        }
+
+        label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #00509e; /* สีกรม */
+        }
+
+        input[type="date"],
+        input[type="number"],
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #ccd6e0;
+            border-radius: 8px;
+            background-color: #f7fbff; /* สีขาวฟ้า */
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="date"]:focus,
+        input[type="number"]:focus {
+            border-color: #0073e6;
+            box-shadow: 0 0 8px rgba(0, 115, 230, 0.3);
+        }
+
+        button {
+            background-color: #0073e6;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #00509e;
+            transform: scale(1.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table, th, td {
+            border: 1px solid #ccd6e0;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        th {
+            background-color: #0073e6;
+            color: white;
+            font-weight: bold;
+        }
+
+        td {
+            color: #333;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+            transform: scale(1.05);
+        }
+
+        .button-container {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>บันทึกการเติมน้ำมันรถยนต์</h1>
+        <form id="fuelRecordForm">
+            <div class="row">
+                <div class="column">
+                    <label for="date">วันที่เติม:</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <div class="column">
+                    <label for="fuelAmount">จำนวนลิตร:</label>
+                    <input type="number" id="fuelAmount" name="fuelAmount" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="column">
+                    <label for="cost">จำนวนเงิน (บาท):</label>
+                    <input type="number" id="cost" name="cost" required>
+                </div>
+                <div class="column">
+                    <label for="mileage">ระยะทางที่วิ่งได้ (กม.):</label>
+                    <input type="number" id="mileage" name="mileage" required>
+                </div>
+            </div>
+            <div class="button-container">
+                <button type="submit">บันทึกข้อมูล</button>
+            </div>
+        </form>
+        <h2>ประวัติการเติมน้ำมัน</h2>
+        <table id="fuelHistory">
+            <thead>
+                <tr>
+                    <th>วันที่เติม</th>
+                    <th>จำนวนลิตร</th>
+                    <th>จำนวนเงิน (บาท)</th>
+                    <th>ระยะทาง (กม.)</th>
+                    <th>ลบ</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        function loadFuelHistory() {
+            const fuelHistory = JSON.parse(localStorage.getItem("fuelHistory")) || [];
+            const fuelHistoryTable = document.getElementById("fuelHistory").getElementsByTagName("tbody")[0];
+
+            fuelHistory.forEach((record, index) => {
+                const newRow = fuelHistoryTable.insertRow();
+                newRow.insertCell(0).textContent = record.date;
+                newRow.insertCell(1).textContent = record.fuelAmount;
+                newRow.insertCell(2).textContent = record.cost;
+                newRow.insertCell(3).textContent = record.mileage;
+
+                const deleteCell = newRow.insertCell(4);
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "ลบ";
+                deleteBtn.classList.add("delete-btn");
+                deleteBtn.addEventListener("click", function() {
+                    deleteRecord(index);
+                });
+                deleteCell.appendChild(deleteBtn);
+            });
+        }
+
+        function saveFuelHistory() {
+            const fuelHistory = [];
+            const fuelHistoryTable = document.getElementById("fuelHistory").getElementsByTagName("tbody")[0];
+            for (let row of fuelHistoryTable.rows) {
+                const cells = row.cells;
+                fuelHistory.push({
+                    date: cells[0].textContent,
+                    fuelAmount: cells[1].textContent,
+                    cost: cells[2].textContent,
+                    mileage: cells[3].textContent
+                });
+            }
+            localStorage.setItem("fuelHistory", JSON.stringify(fuelHistory));
+        }
+
+        function deleteRecord(index) {
+            const fuelHistory = JSON.parse(localStorage.getItem("fuelHistory")) || [];
+            fuelHistory.splice(index, 1);
+            localStorage.setItem("fuelHistory", JSON.stringify(fuelHistory));
+            location.reload();
+        }
+
+        const form = document.getElementById("fuelRecordForm");
+
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const date = document.getElementById("date").value;
+            const fuelAmount = document.getElementById("fuelAmount").value;
+            const cost = document.getElementById("cost").value;
+            const mileage = document.getElementById("mileage").value;
+
+            const newRow = document.getElementById("fuelHistory").getElementsByTagName("tbody")[0].insertRow();
+
+            newRow.insertCell(0).textContent = date;
+            newRow.insertCell(1).textContent = fuelAmount;
+            newRow.insertCell(2).textContent = cost;
+            newRow.insertCell(3).textContent = mileage;
+
+            const deleteCell = newRow.insertCell(4);
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "ลบ";
+            deleteBtn.classList.add("delete-btn");
+            deleteBtn.addEventListener("click", function() {
+                deleteRecord(newRow.rowIndex - 1);
+            });
+            deleteCell.appendChild(deleteBtn);
+
+            form.reset();
+            saveFuelHistory();
+        });
+
+        window.onload = loadFuelHistory;
+    </script>
+</body>
+</html>
